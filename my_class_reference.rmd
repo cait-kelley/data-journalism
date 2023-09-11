@@ -34,11 +34,24 @@ setwd("~/code/data_journalism_2023_spring")
 ### How to install and load the tidyverse
 
 ```{r}
-install.packages("tidyverse")
+#install.packages("tidyverse")
 library(tidyverse)
 ```
 
 ### How to read in a CSV file from the Internet
+
+CSV files are columns of data separated by commas
+You put the name of what you are creating first. Ex. wes_moore_contributions
+
+Don't put spaces or dashes in names, you can use underscores instead.
+
+R has a tough time when you name something starting with a number.
+
+dbl field means R thinks its a number so you can find averages, etc. lgl means logical so you can say true false.
+
+year-month-day is the correct date format
+
+data is most useful when each piece of info is in a separate column
 
 ```{r}
 wes_moore_contributions <- read_csv("https://raw.githubusercontent.com/stephenneukam/CNS_Annapolis/main/Campaign_finance/Moore_ContributionsList.csv")
@@ -53,5 +66,3 @@ dataframe %>%
   group_by(some_column) %>% 
   summarize(count = n())
 ```
-
-
