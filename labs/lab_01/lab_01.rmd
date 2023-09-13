@@ -1,0 +1,90 @@
+---
+title: "lab_01"
+author: "Derek Willis"
+date: "2023-01-05"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+# Turn off scientific notation
+options(scipen=999)
+```
+
+## About this lab
+
+To complete this lab, you need to: \* run existing code as directed (look for **Task**). \* modify existing code as directed (look for **Task**). \* write code in empty codeblocks provided to answer questions included (look for **Q**). \* write out the answer in the form of a complete sentence in the space given (look for **A**). When you are finished, commit changes and push to your personal GitHub repo, then submit the URL to this document on ELMS.
+
+Remember to add any new verbs or concepts to your class reference notebook!
+
+## Load libraries and establish settings
+
+**Task** Run the codeblock below to load the Tidyverse. To run the codeblock, hit the little green play button in the upper right corner of the gray area (the codeblock) below.
+
+```{r}
+# Load the tidyverse. If you have not installed the tidyverse already, remove the # from the next line and run it first.  
+# install.packages('tidyverse')
+library(tidyverse)
+```
+
+## Load Data
+
+We're going to load the UMD courses data.
+
+**Task** Run the codeblock below to load the data, which is contained in an RDS file.
+
+```{r}
+umd_courses <- read_rds("lab_01.rds")
+```
+
+## Answer questions
+
+**Q1** Which department has the highest mean (average) number of seats for its classes? You need to show the department with the highest average first. Which one is the most surprising/interesting to you?
+**A1** Engineering, Cooperative Education is the department with the highest average number of seats in their classes. I didn't know what that was so I Googled it. I think it's specific Engineering classes that include a work-study or internship component. I also didn't understand what University Courses was and I couldn't find that answer online. I was surprised to find out we had an Air Science department! I also looked at the departments with fewest average seats which was interesting. Some science departments have the most average seats and some have the fewest, which I found interesting. Like Biophysics was one of the least. I don't know what that is but why is it so much less popular or more specialized than other sciences?
+
+```{r}
+umd_courses |>
+  group_by(department) |>
+  summarise(
+    count_classes = n(),
+    total_seats = sum(seats),
+    mean_seats = mean(seats),
+  ) |>
+  arrange(desc(mean_seats))
+```
+
+**Q2** Find out the greatest number of times any individual class has been offered in our dataset. Your code must show the greatest number of classes first. 
+**A2** I think the greatest number of times a class has been offered in our data set is 22. Many classes have been offered 22 times.
+
+```{r}
+umd_courses |>
+  group_by(id) |>
+  summarise(
+    count_classes = n()
+  ) |>
+  arrange(desc(count_classes))
+```
+
+**Q3** Count the number of courses for each instructor and department. Which instructor has taught the most? **A3** Many of the most common courses do not list a specific instructor. Keith Yearwood in Geographical Sciences is the named instructor with the most classes: 61.
+
+```{r}
+umd_courses |>
+  group_by(instructors, department) |>
+  summarise(
+    count_classes = n()
+  ) |>
+  arrange(desc(count_classes))
+```
+
+**Q4** Given the results for Q3, what would have made it easier to find the answer? You don't have to know *how* to accomplish this; I want you to describe in words what would make the answer easier to see. How confident are you that the answer you got is the right one, and why? **A4** It would have helped to eliminate all results that had NA in the instructors column. I had to click through eight pages of results this way to find the first instructor name listed and I could have missed a name by clicking quickly. But I am confident I got the correct answer because I went back and scrolled through the pages of instructor names and NAs several times.
+
+**Q5** Take one of the questions you listed in the final question of the pre_lab and try to answer it here in code. If you don't know how to fully answer it, write what code you can and describe in words what else you would need to do. If you got an answer, is it interesting? **A5** I'm going to try to answer what department cut the most number of classes during the pandemic. But I'll narrow it down to comparing classes in fall 2019 to fall 2020, not throughout the whole pandemic. I could show the data by department and term and how many classes, but I don't know how to just show the fall terms from 2019 and 2020. Just adding 201908 and 202008 after "term" did not work. But when I figure out how to do that I can first run the code for fall 2019 and then look at the data for 2020. I could easily compare how the departments with the biggest or smallest classes changed between the years, but I don't know how to calculate which department had the biggest change between the years.
+
+```{r}
+umd_courses |>
+  group_by(term, department) |>
+  summarise(
+    count_classes = n()
+  ) |>
+  arrange(desc(count_classes))
+```
