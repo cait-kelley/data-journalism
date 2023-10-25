@@ -1,0 +1,179 @@
+---
+title: "pre_lab_06.Rmd"
+author: "derek willis"
+date: "2023-03-09"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Points to hit
+
+1.  Review of previous lab questions/problems.
+2.  Demonstration of combining and merging
+
+## Chapter 23
+
+### Task 1: Load libraries and settings
+
+**Task** Run the following code in the gray-colored codeblock below to load the tidyverse library and turn off scientific notation.
+
+```{r}
+# turn off sci notation
+options(scipen=999)
+library(tidyverse)
+library(lubridate)
+library(janitor)
+```
+
+### Task 2: Load data
+
+Let's say that we have Maryland county voter registration data from four different elections in four different files. They have a similar layout and the same number of counties (plus Baltimore City).
+
+**Task** Load the four CSV population estimate files. Do they have the same column structure? 
+
+They mostly do. Some of the column names are switched in order, but that's okay. The main issue is county_voters_2022 has a column name "Total" that's not uppercase. We will have to make it uppercase. (Using clean names is easiest if you have to standardize lots of things.)
+
+```{r}
+county_voters_2016 <- read_csv("data/county_voters_2016.csv")
+county_voters_2018 <- read_csv("data/county_voters_2018.csv")
+county_voters_2020 <- read_csv("data/county_voters_2020.csv")
+county_voters_2022 <- read_csv("data/county_voters_2022.csv")|>rename(TOTAL=Total)
+```
+
+### Task 3: Using bind_rows
+
+**Task** Combine the four files into a single data frame using the bind_rows function. Add a description of what this code does to your reference notebook.
+
+bind_rows combines dataframes that have the same structure (same columns). You make a list of the names of the dataframes.
+
+```{r}
+# bind_rows with list
+county_voters_combined <- bind_rows(list(county_voters_2016, county_voters_2018, county_voters_2020, county_voters_2022))
+View(county_voters_combined)
+```
+
+### Task 4: Asking a question
+
+**Task** Run the following code to filter on Frederick County's registration data and look at the results. What stands out to you about the changes in party registration over time? 
+**Answer**
+Party registration has increased each year. Both Dems and Reps increased registration each year by a few thousand voters. But independents and uncommon small parties also grew steadily. Libertarians and Green party lost voters in 2020, and still didn't get up to 2018 levels in 2022.
+
+```{r}
+county_voters_combined |> filter(COUNTY == 'Frederick')
+```
+
+## Joining data
+
+Joinging means connecting two different types of dataframes that measure different things, but have one thing in common.
+
+### Task 5: Loading population data
+
+**Task** Load the Maryland 2020 county population data
+
+```{r}
+maryland_population <- read_csv('data/maryland_population_2020.csv')
+view(maryland_population)
+```
+
+### Task 6: Join population and voter data
+
+**Task** Run the following code to join Maryland population data and the 2022 voter registration data together using the common column county as the key. How many rows are there now? How many *should* there be? **Answer** There are 24 rows, which is correct because there are 24 counties.
+
+```{r}
+# we start with one data frame, the larger one first. Left_join means we want every row in maryland_population to show up even if there's no match in county_voters_2022. inner_join is to combine data in common. left_join is safer because you can see if the join worked. join_by is the column that both have in common.
+# with nrow included to show row total
+maryland_population |> left_join(county_voters_2022, join_by("COUNTY")) |> nrow()
+```
+
+### Task 7: Looking at Joined Data
+
+**Task** Examine the combined data
+
+Whenever you do a join SAVE IT TO A NEW DATAFRAME. Select is a way to reorder columns.
+
+```{r}
+# without nrow
+maryland_population |> left_join(county_voters_2022, join_by("COUNTY"))
+
+```
+
+### Task 8: Assign Joined Data to New Dataframe
+
+By default, `dplyr` will do a "natural" join, where it'll match all the matching columns in both tables. So if we take out the `join_by()`, it'll use all the common columns between the tables. That may not be right in every instance but let's try it. If it works, we should get 24 rows.
+
+**Task** Create a new dataframe with population and voter data joined together. Add a description of what this code does to your reference notebook.
+
+```{r}
+maryland_population_with_voters <- maryland_population |> left_join(county_voters_2022, join_by("COUNTY"))
+```
+
+### Task 9: Add the Demographic Data
+
+**Task** Load the Maryland demographic data and examine it. What kind of information does it contain? **Answer**
+It has the GEO ID/CODE of the locations. They start with 24 because Maryland's GEO ID is 24. Even numbers are cities, odd are counties. These identifiers help standarize location names that are presented differently in different datasets. It has population over 18 and racial/ethnic information.
+
+```{r}
+maryland_demographics <- read_csv('data/maryland_demographics.csv')
+view(maryland_demographics)
+```
+
+### Task 10: Join demographic data to combined voting/population data
+
+**Task** Join the demographic data to the our combined voting/population data. To do this, we need to specify the join columns since the names aren't the same in the two dataframes.
+
+We are telling R that the column COUNTY should be considered the same as the column NAME.
+
+```{r}
+maryland_population_with_voters_and_demographics <- maryland_population_with_voters |> left_join(maryland_demographics, join_by(COUNTY == NAME))
+```
+
+### Task 11: Asking Demographic Questions
+
+**Task** Using mutate, let's find the county with the highest 18+ Black population as a percentage of all population 18 and over and also the percentage of Democrats in that county. Put your answers below. **Answer** Prince George's County has the highest 18+ Black population as a percentage of all population 18+ and the highest percentage of Dems.
+
+```{r}
+maryland_population_with_voters_and_demographics |>
+  mutate(pct_black_18_plus = (pop_black/pop_18_over)*100, pct_dems = (DEM/TOTAL)*100) |> 
+  arrange(desc(pct_black_18_plus)) |> 
+  select(COUNTY, pct_black_18_plus, pct_dems)
+```
+
+### Task 12: Asking Demographic Questions
+
+**Task** Now let's find the county with the highest 18+ Asian population as a percentage of all population 18 and over and also the percentage of Democrats in that county. How do these results compare to the previous task? Put your answers below. **Answer**
+The county with the highest 19+ Asian pop as a percentage of all 18+ pop is Howard County. Asian voters don't map onto the Democratic party as much as Black voters. The percentage Dem results look pretty random this time.
+```{r}
+maryland_population_with_voters_and_demographics |>
+  mutate(pct_asian_18_plus = (pop_asian/pop_18_over)*100, pct_dems = (DEM/TOTAL)*100) |> 
+  arrange(desc(pct_asian_18_plus)) |> 
+  select(COUNTY, pct_asian_18_plus, pct_dems)
+```
+
+### Task 13: Fixing Join Problems
+
+Sometimes joins look like they should work but don't. Often this is due to the two columns you're joining on having different data types: joining a <chr> column to a <dbl> column, for example. Let's walk through an example of that using some demographic data by zip code.
+
+**Task** Run the following code to load the Zip Code Tabulation Area data for Maryland. What's the datatype of the ZCTA5N column? **Answer** It's a number, but we don't want that. We want it to be a character.
+
+```{r}
+maryland_zcta <- read_csv('data/maryland_zcta.csv')
+glimpse(maryland_zcta)
+```
+
+The column we're interested in, ZCTA5N, is a <dbl> column - it's a number. We want it to be a <chr> column - text.
+
+as.character
+as.numeric
+
+If you add columns or rows, make a new dataframe. If you are just improving the data or column names etc, you can keep the same dataframe and update it.
+
+**Task** Run the following code to change the datatype of ZCTA5N from numeric to character. What's the datatype of ZCTA5N? **Answer** Now it's a character, <chr>, yay!
+
+```{r}
+maryland_zcta <- maryland_zcta |> mutate(ZCTA5N = as.character(ZCTA5N))
+```
+
+Now we can join this dataframe to other zip code data where the zip code column is text, not numbers.
