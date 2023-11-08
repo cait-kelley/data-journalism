@@ -165,7 +165,7 @@ I decided to put median income on the the x-axis and total calls on the y-axis b
 
 7. Yes, I think median household income does have a relationship with overdose calls in that zip code. I see the biggest chunk of calls happen in zip codes with median household income that's around 75,000 dollars a year. That's on the low end of middle class income in Prince George's County, on the edge of qualifying for housing assistance if those households have incomes from 1 or 2 people. Some of the lowest income zip codes don't have high numbers of calls which may be because it's easier to pay for a substance abuse problem if you have some disposable income? I think that makes sense because there are quite a few calls in zip codes with incomes a bit more than 100,000 dollars.
 
-I think I'd report the two spikes in calls and how at very low and very high income the number of calls drops off.
+I think I'd report the two spikes in calls and how at very low and very high income the number of calls drops off. 
 
 
 ```{r}
