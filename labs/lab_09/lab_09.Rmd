@@ -22,7 +22,8 @@ knitr::opts_chunk$set(echo = TRUE)
 # load libraries here
 library(tidyverse)
 library(janitor)
-library(tidycensus)
+
+
 ```
 
 ## Questions
@@ -33,22 +34,24 @@ You MUST do the following things when answering this question: \* Load the md_go
 
 **A1.**
 
-Published chart: https://www.datawrapper.de/_/aES3x/
 
-I chose to use a bullet bar graph to clearly contrast the percentage of votes for Cox and and Hogan. I think the main story is that Cox did much worse than former Governor Hogan. 
+
 
 ```{r}
-md_gov_county <- read_csv("data/md_gov_county.csv")
 md_gov_county_18 <- read_csv("data/md_gov_county_18.csv")
 
+md_gov_county <- read_csv("data/md_gov_county.csv")
+
 md_gov_county_18_22 <- md_gov_county |> left_join(md_gov_county_18, join_by("County", "GEOID")) |>
-  clean_names() |>
-  rename(write_ins_2022 = "write_ins_x",
-         write_ins_2018 = "write_ins_y") |>
-  mutate(total_votes_2022 = cox + moore + lashar + wallace + harding + sefcik + write_ins_2022) |>
-  mutate(percent_votes_cox = cox/total_votes_2022*100) |>
-  mutate(total_votes_2018 = hogan + jealous + quinn + schlakman + write_ins_2018) |>
-  mutate(percent_votes_hogan = hogan/total_votes_2018*100)
+  clean_names()
+
+md_gov_county_18_22 <- md_gov_county_18_22 |>
+  rename(write_ins_2018 = "write_ins_y",
+         write_ins_2022 = "write_ins_x") |>
+   mutate(total_votes_2018 = hogan + jealous + quinn + schlakman + write_ins_2018) |>
+  mutate(percent_votes_hogan = (hogan/total_votes_2018)*100) |>
+   mutate(total_votes_2022 = cox + moore + lashar + wallace + harding + sefcik + write_ins_2022) |>
+  mutate(percent_votes_cox = (cox/total_votes_2022)*100)
 
 write_csv(md_gov_county_18_22, "data/md_gov_county_18_22.csv")
 
@@ -63,23 +66,7 @@ What do you think the story here is? Put the answer below along with the URL of 
 
 **A2.**
 
-Published chart: https://www.datawrapper.de/_/b9P8F/
-
-I chose to put time on the x-axis and percentage of votes on the y-axis because I like time in a timeline format and I like associating up with more. I chose to highlight how many voters still vote by mail because voting in person and early seem to be back to prepandemic patterns, just with some of those people choosing to vote by mail.
-
 ```{r}
-md_votes_by_type <- read_csv("data/md_votes_by_type.csv")
-
-md_votes_by_type_percent <- md_votes_by_type |>
-  clean_names() |>
-  mutate(percent_early = early/total*100) |>
-  mutate(percent_election_day = election_day/total*100) |>
-  mutate(percent_mail = mail/total*100) |>
-  select(year, percent_early, percent_election_day, percent_mail)
-
-write_csv(md_votes_by_type_percent, "data/md_votes_by_type_percent.csv")
-  
-
 ```
 
 **Q3.** You want to know more about the geography of 911 overdose calls in Montgomery County, Maryland, in 2022. To do that, you'll make a choropleth map in Datawrapper. You will need to:
@@ -96,66 +83,5 @@ What do you think the story here is, and what would you want to know more about?
 
 **A3.**
 
-My map: https://www.datawrapper.de/_/MxbwK/
-
-(Very weird that 20889 which includes Bethesda wasn't included in the census data.)
-
-Top five zip codes calls_per_1000:     20877, 20852, 20874, 20860, 20871
-
-Top five zip codes calls_per_1000 max: 20877, 20852, 20874, 20871, 20850
-
-Top five zip codes calls_per_1000 min: 20877, 20852, 20860, 20874, 20871
-
-Okay the margins of error give back the same top 2 zip codes and slightly varied answers after that. If I mention specific zip codes in my chart it will only be the top 2.
-
-I realized when I made the map that 21794 was included in the Montgomery County data but it shouldn't be, that's in Howard County. I deleted the data row in Datawrapper. 20707 was the same problem, that's in Prince George's County. This source said some mailboxes in Montgomery County are in that zip code (https://www.zip-codes.com/zip-code/20707/zip-code-20707.asp) but I don't think that's a good reason to include it. Mailboxes don't call the cops. Basically I googled a map of Montgomery County and elimiated any problem zip codes based on that. The boundaries don't match perfectly, but eliminating those two zip codes helps a lot.
-
-I included total calls, zip code, and calls per 1000 people in the tooltips. I know you asked for percentage of total calls, but then you also suggested looking at calls per capita and I think it's more useful to show on the map total calls and calls in proportion to the population than total calls and percentage of total calls.
-
-To include prominent places it seemed like I'd have to choose just showing Silver Spring or showing all zip codes. Silver Spring seemed like the better of the two options.
-
-I think the story is about those zip codes with the most calls per 1000 people. I'm curious about 20852 because it doesn't map cleanly onto a city or neighborhood. I wonder what connects the people in that zip code, what it's like there.
-
 ```{r}
-montgomery_2022_overdoses <- read_csv("data/montgomery_2022_overdoses.csv")
-
-montgomery_2022_overdoses_zip <- montgomery_2022_overdoses|>
-  mutate(zip = as.character(zip)) |>
-  group_by(zip) |>
-  summarise(total_calls = n())
-
-montgomery_2022_overdoses_zip <- montgomery_2022_overdoses_zip |>
-    mutate(percent_total_calls = (total_calls/659)*100)
-
-
-
-acs5 <- load_variables(2020, "acs5", cache = TRUE)
-
-md <- get_acs(geography = "zcta",
-              variables = c(population = "B09021_001"),
-              state = "MD",
-              year = 2019)
-
-mont_overdoses_2022_census <- left_join(montgomery_2022_overdoses_zip, md, by = c ('zip'='GEOID')) |>
-  rename(population = "estimate") |>
-  select(zip, total_calls, percent_total_calls, population, moe) |>
-  mutate(calls_per_1000 = total_calls/population*1000) |>
-  arrange(desc(calls_per_1000))
-
-mont_overdoses_2022_census|>
- mutate(min=(population-moe), max=(population+moe)) |> 
-  drop_na() |>
-  mutate(calls_per_1000_max = total_calls/max*1000) |> 
-  arrange(desc(calls_per_1000_max))
-
-mont_overdoses_2022_census|>
- mutate(min=(population-moe), max=(population+moe)) |> 
-  drop_na() |>
-  mutate(calls_per_1000_min = total_calls/min*1000) |> 
-  arrange(desc(calls_per_1000_min))
-
-write_csv(mont_overdoses_2022_census, "data/mont_overdoses_2022_census.csv")
-
-
-
 ```
