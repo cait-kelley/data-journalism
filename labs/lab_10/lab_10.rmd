@@ -115,11 +115,13 @@ Finally, make a second county map showing the per capita rate. What counties sta
 
 **A3.**
 
-Part 1: Caroline County stands out as having the biggest percentage change in number of electric vehicles in 2023 compared to 2020. But they still don't have many vehicles and it's not a huge percent increase. I did Google to see if the county has any incentives or programs to encourage EV ownership but I didn't see much, just that they do have some charging stations in the county. I think the story is more that there has been slow but steady growth in the number of electric vehicles in all Maryland counties. It would be interesting to compare this to other states and see if Maryland is a slow adopter of EVs.
+Part 1: Caroline County stands out as having the biggest percentage change in number of electric vehicles in 2023 compared to 2020. They still don't have that many vehicles, but it is a large percentage increase. I did Google to see if the county has any incentives or programs to encourage EV ownership but I didn't see much, just that they do have some charging stations in the county. I wouldn't necessarily do a headline about the growth in Caroline County because it might be misleading because they have so few vehicles, in total and per capita.
+
+I think the story is more that there has been significant growth in the number of electric vehicles in all Maryland counties. It would be interesting to compare this to other states and see if Maryland is a slow adopter of EVs.
 
 Part 2: I tried to copy the pre-lab and use inner join or left join and I kept getting an error saying I have to use a spatial join but that didn't work either. Adriana suggested I bind the columns instead. Also the geometry is different in each dataframe. I'll just use the one from the census data. Though I did go back and realize I should use the original ev data for the second part of the question, I had been mistakenly using the ev data that I had joined in part 1 which may be what caused all these problems. If I hadn't made that mistake though I wouldn't have seen the discrepancies in the geometries.
 
-I think this map is more useful because like I said, the percent growth wasn't that impressive in any county. This shows the counties with the most EVs per 1000 people are Montgomery, Howard and Somerset counties. Somerset is interesting because it's the second least populous county in Maryland and doesn't seem particularly wealthy.
+I think this map is more useful because like I said, the percent growth could be a little misleading. But both maps together might be best. Show the action of the change over time plus the raw numbers. This map shows the counties with the most EVs per 1000 people are Montgomery, Howard and Somerset counties. Somerset is interesting because it's the second least populous county in Maryland and doesn't seem particularly wealthy.
 
 St. Mary's County also stands out because it clearly has the fewest EVs per person.
 
