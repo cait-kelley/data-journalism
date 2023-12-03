@@ -1,0 +1,100 @@
+---
+title: "Grad Student Assignment"
+author: "Cait Kelley"
+date: "12/3/2023"
+output:
+  html_document:
+    theme: cerulean
+    highlight: pygments
+    toc: true
+    toc_float:
+      collapsed: true
+      smooth_scroll: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction
+
+In this notebook, I'm looking at violent crime and property crime stats in Maryland: <https://opendata.maryland.gov/Public-Safety/Violent-Crime-Property-Crime-by-County-1975-to-Pre/jwfa-fdxs>
+
+## Load libraries
+
+Loading required libraries for this analysis.
+
+```{r echo=FALSE, message=FALSE}
+library(tidyverse)
+library(tidycensus)
+library(janitor)
+```
+
+## Load and Cleaning Data
+
+In this section, describe the source of the data, write a basic data dictionary for data you are working with, and discuss any caveats or issues you discovered working with this data.
+
+Other questions to answer in this notebook:
+
+Who created and maintains the data?
+
+What state program or law is connected to it?
+
+What does each row represent?
+
+What is the chronological and geographic scope of this data?
+
+If this data contains aggregates (totals), can you find itemized data that those totals are derived from?
+
+Do the totals match your own calculations using the itemized data?
+
+```{r}
+# Load required data
+violent_and_property_crime_md <- read_csv("data/violent_crime_property_crime_by_county_1975_to_present.csv")
+
+
+# Clean required data and prepare for analysis if needed. 
+
+
+```
+
+## Story Ideas
+
+In this notebook, I am exploring three potential story ideas.
+
+### Story Idea 1
+
+-   **Sentence text**: [Paste in sentence to engineer here]
+-   **Analysis summary**: [Write up two to three sentences describing the results of your analysis. Were you able to confirm the finding? If not, why not?]
+
+```{r}
+# Put code to reverse engineer sentence here
+
+# Display results of code below this codeblock
+
+```
+
+### Story Idea 2
+
+-   **Sentence text**: [Paste in sentence to engineer here]
+-   **Analysis summary**: [Write up two to three sentences describing the results of your analysis. Were you able to confirm the finding? If not, why not?]
+
+```{r}
+# Put code to reverse engineer sentence here
+
+# Display results of code below this codeblock
+
+```
+
+### Story Idea 3
+
+-   **Sentence text**: [Paste in sentence to engineer here]
+-   **Analysis summary**: [Write up two to three sentences describing the results of your analysis. Were you able to confirm the finding? If not, why not?]
+
+```{r}
+# Put code to reverse engineer sentence here
+
+# Display results of code below this codeblock
+
+```
+
