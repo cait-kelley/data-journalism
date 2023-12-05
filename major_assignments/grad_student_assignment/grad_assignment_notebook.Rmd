@@ -1,7 +1,7 @@
 ---
 title: "Grad Student Assignment"
 author: "Cait Kelley"
-date: "12/3/2023"
+date: "12/4/2023"
 output:
   html_document:
     theme: cerulean
@@ -32,37 +32,37 @@ library(janitor)
 
 ## Load and Cleaning Data
 
-In this section, describe the source of the data, write a basic data dictionary for data you are working with, and discuss any caveats or issues you discovered working with this data.
+**In this section, describe the source of the data, write a basic data dictionary for data you are working with, and discuss any caveats or issues you discovered working with this data.**
 
 This dataset contains data about violent and property crimes in Maryland between 1975 and 2020.
 
 1975 is missing percent change data because they can't compare that year's data to 1974's data. No other year is missing percent change data.
 
-Other questions to answer in this notebook:
+**Other questions to answer in this notebook:**
 
--Who created and maintains the data?
+**-Who created and maintains the data?**
 
 "The data are provided are the Maryland Statistical Analysis Center (MSAC), within the Governor's Office of Crime Control and Prevention (GOCCP). MSAC, in turn, receives these data from the Maryland State Police's annual Uniform Crime Reports." -<https://opendata.maryland.gov/Public-Safety/Violent-Crime-Property-Crime-by-County-1975-to-Pre/jwfa-fdxs>
 
 The Department of Information Technology updates the data.
 
--What state program or law is connected to it?
+**-What state program or law is connected to it?**
 
 Crime statistics are supposed to be submitted to the state of Maryland and to the FBI accoring to UCI (Uniform Crime Reporting) standards.
 
--What does each row represent?
+**-What does each row represent?**
 
 The dataset has 1,104 rows which represent yearly stats for every county. However, a few rows are not in chronological order, but I did check and every jurisdiction has data for all 46 years.
 
--What is the chronological and geographic scope of this data?
+**-What is the chronological and geographic scope of this data?**
 
 The data goes from 1975 to 2020. Not sure why there isn't more recent data. It shows jurisdiction/county data.
 
--If this data contains aggregates (totals), can you find itemized data that those totals are derived from?
+**-If this data contains aggregates (totals), can you find itemized data that those totals are derived from?**
 
 Yes.
 
--Do the totals match your own calculations using the itemized data?
+**-Do the totals match your own calculations using the itemized data?**
 
 Yes.
 
@@ -124,24 +124,27 @@ In this notebook, I am exploring three potential story ideas.
 
 ### Story Idea 1
 
--   **Sentence text**: Can I see the so called Freddie Gray Effect on crime stats in Baltimore when I compare their stats to the state as a whole? 
+-   **Can I see the so called Freddie Gray Effect on crime stats in Baltimore when I compare their stats to the state as a whole?**
 
-The idea of the Freddie Gray Effect (https://www.usatoday.com/story/news/nation/2018/07/12/baltimore-police-not-noticing-crime-after-freddie-gray-wave-killings-followed/744741002/) is that police stopped proactively fighting crime after the killing of Freddie Gray (April 12, 2015) and subsequent protests against police and Obama administrations investigations into police departments. And then there was a wave of violent crime. This dataset doesn't have monthly stats, but I wonder if serious violent crimes went up in the year(s) after his murder in Baltimore, especially compared to Maryland as a whole.  
+The idea of the Freddie Gray Effect (<https://www.usatoday.com/story/news/nation/2018/07/12/baltimore-police-not-noticing-crime-after-freddie-gray-wave-killings-followed/744741002/>) is that police stopped proactively fighting crime after the killing of Freddie Gray (April 12, 2015) and subsequent protests against police and Obama administrations investigations into police departments. And then there was a wave of violent crime. This dataset doesn't have monthly stats, but I wonder if serious violent crimes went up in the year(s) after his murder in Baltimore, especially compared to Maryland as a whole.
 
--   **Analysis summary**: Looks like the statewide murder rate was at an all-time low in 2014 and then shot up for a few years starting in 2015. I then removed Baltimore City from the overall state data to truly compare the city and the rest of the state. You can see a much clearer downward trend in the murder rate in Maryland over time if you remove the Baltimore City data. This seems to back up what other data investigations have found. It's interesting that it looks like the murder rate has trended upward in Balitmore, in contrast to the rest of the state, in general over time not just in 2015.
-
-Overall however, the murder rate appears to have been much higher in the state as a whole compared to Baltimore City over time. I don't know if calculating the rate per 100,000 people could be affecting that because the numbers just get so small, or if that's just true. If I were to completely report out this story I'd check that.
+-   **Analysis summary**: Looks like the statewide murder rate was at an all-time low in 2014 and then shot up for a few years starting in 2015. I then removed Baltimore City from the overall state data to truly compare the city and the rest of the state. You can see a much clearer downward trend in the murder rate in Maryland over time if you remove the Baltimore City data. This seems to back up what other data investigations have found. It's interesting that it looks like the murder rate has trended upward in Baltimore, in contrast to the rest of the state, in general over time not just in 2015.
 
 I calculated the percent change (based on the murder rate percent change column in the dataset) in the murder rates. The percent change in murders per 100,000 people in Baltimore City from 2014-2015 was 63.6 and 971.8 for the remaining counties in total, but I think I have to divide that number by 23 which equals 42.3. In which case the rate of change in Baltimore City was higher than the other counties.
 
-I think the Freddie Gray Effect of increased murders in Baltimore since 2015 can be seen in this statewide yearly crime statistics. I'd like to see the crime stats since 2020 to see if this trend continued. When those come out that's a potential story as well.
+I think the Freddie Gray Effect of increased murders in Baltimore since 2015 can be seen in this statewide yearly crime statistics. I'd like to see the crime stats since 2020 to see if this trend continued. I originally thought I could look at which parts of Baltimore (and the demographics of those areas) suffered the Freddie Gray affect the most, but this crime data only goes down to the county/jurisdiction level.
 
 ```{r}
 # Put code here
 # Comparing murder rates per capita in Baltimore City and Maryland as a whole over time
-violent_and_property_crime_md |>
+murder_rate_md <- violent_and_property_crime_md |>
+   group_by(year) |>
+  summarise(murder_100_000_total = sum(murder_per_100_000_people)) |>
+  mutate(murder_100_000_average = murder_100_000_total/23)
+
+murder_rate_md |>
   ggplot() +
-  geom_bar(aes(x=year, weight=murder_per_100_000_people)) +
+  geom_bar(aes(x=year, weight=murder_100_000_average)) +
 labs(
   title = "Murder rate in Maryland, 1975-2020",
     x = "Year",
@@ -153,15 +156,22 @@ labs(
 violent_and_property_crime_wo_bc <- violent_and_property_crime_md |>
   filter(jurisdiction != "Baltimore City")
 
+# Have to divide total crime by 23 to get the average outside Baltimore City
+
+murder_rate_wo_bc_final <- violent_and_property_crime_wo_bc |>
+  group_by(year) |>
+  summarise(murder_100_000_total = sum(murder_per_100_000_people)) |>
+  mutate(murder_100_000_average = murder_100_000_total/23)
+
 # Graph statewide data again without Baltimore City
 
-violent_and_property_crime_wo_bc |>
+murder_rate_wo_bc_final |>
   ggplot() +
-  geom_bar(aes(x=year, weight=murder_per_100_000_people)) +
+  geom_bar(aes(x=year, weight=murder_100_000_average)) +
 labs(
-  title = "Murder rate in Maryland Not Counting Baltimore City, 1975-2020",
+  title = "Average Murder Rate in Maryland Not Counting Baltimore City, 1975-2020",
     x = "Year",
-    y = "Murders per 100,000 people")
+    y = "Average murders per 100,000 people")
 
 # rate of change between 2014 and 2015 for statewide minus BC
 
@@ -169,7 +179,8 @@ violent_and_property_crime_wo_bc |>
   filter(year == "2015") |>
   select(jurisdiction, year, murder_per_100_000_people, murder_rate_percent_change_per_100_000_people) |>
   group_by(year) |>
-  summarise(total_percent_change = sum(murder_rate_percent_change_per_100_000_people))
+  summarise(total_percent_change = sum(murder_rate_percent_change_per_100_000_people)) |>
+  mutate(pct_change_adjusted = total_percent_change/23)
 
 # Pull out Baltimore City data
 
@@ -201,8 +212,17 @@ labs(
 
 ### Story Idea 2
 
--   **Sentence text**: Which counties in Maryland experienced the biggest percent change in violent crime in 2020 and what are the demographics of those counties?
--   **Analysis summary**: I used the Maryland demographics dataset that we already had from pre lab 6. It should be relatively similar to 2020 demographics. I'll join that with the crime data.
+-   **Which counties in Maryland experienced the biggest percent change in violent crime in 2020 (the first year of the pandemic) and what are the racial and age demographics of those counties?**
+
+-   **Analysis summary**: I used the Maryland demographics dataset that we already had from pre lab 6. I joined that with the crime data.
+
+St. Mary's County stood out as having the biggest percent change in murder rate in 2020, though they only had 7 total murders. I graphed their murder rate over time and it does seem to be a general downward trend, with a spike in 2020.
+
+I then compared the percent change in total violent crime across the state. There overall seemed to be an increase in percent change of murders, but not much of an overall increase in percent change of total violent crime. However, in this graph Worcester County stood out so I graphed total violent crime per capita in Worcester over time. That graph showed a clear downward trend since 2002, with a spike in 2020.
+
+Then I looked at percent change in violent crime by county in 2020 compared to the percent of black residents in each county. I'm not sure exactly how to parse this out or if it's worth parsing out, but there seems to be something to the idea that the pandemic affected crime rates in a new way that affected different communities than are normally affected by high crime rates. Lots of whiter, lower crime counties saw high percentage change increases (though their overall numbers were relatively lower) while some counties with high percentage black populations, like Baltimore City and Somerset County, saw a decrease in the rate of violent crime in 2020.
+
+If I were to follow this through I'd see if there's a story in the idea that the pandemic shifted the reasons why violent crimes were committed in Maryland and why different people seemed to be affected than were primarily affected by violent crimes before.
 
 ```{r}
 # Put code here
@@ -224,8 +244,75 @@ murder_total_violent_crime_md <- violent_and_property_crime_md |>
 
 murder_violent_crime_demographics_md <- murder_total_violent_crime_md |>
   left_join(md_demographics, join_by("jurisdiction")) |>
-  select(-geocode, -pop_one_race, -pop_other, -pop_two_more)
+  select(-geocode, -pop_one_race, -pop_other, -pop_two_more)|>
+  mutate(pct_black = pop_black/population*100)
  
+# Bar graph showing murder rate percent change per 100,000 people per county
+
+murder_total_violent_crime_md |>
+  ggplot() +
+  geom_bar(aes(x=reorder(jurisdiction,murder_rate_percent_change_per_100_000_people), weight=murder_rate_percent_change_per_100_000_people)) +
+  geom_bar(aes(x=jurisdiction, weight=murder_rate_percent_change_per_100_000_people)) +
+labs(
+  title = "Percent Change in Murder Rate by County, 2020",
+    x = "Year",
+    y = "% Change in Murder Rate per 100,000 People")+
+  theme(
+    axis.text.x = element_text(angle = 90,  hjust=1)
+  )
+
+# ^ this graph shows some big percent changes, though those are misleading because those counties have very low crime rates so small changes in total murders can make the data swing wildly. I decided to graph St. Mary's County over time, just to see if this might be interesting, though graphing such small numbers may not be able to show much.
+
+violent_and_property_crime_st_marys <- violent_and_property_crime_md |>
+  filter(jurisdiction == "St. Mary's County")
+
+violent_and_property_crime_st_marys |>
+  ggplot() +
+  geom_bar(aes(x=year, weight=murder_per_100_000_people)) +
+labs(
+  title = "Murder rate in St. Mary's County, 1975-2020",
+    x = "Year",
+    y = "Murders per 100,000 people")
+
+# Graph percent change in total violent crime in the state in 2020
+
+murder_total_violent_crime_md |>
+  ggplot() +
+  geom_bar(aes(x=jurisdiction, weight=violent_crime_rate_percent_change_per_100_000_people)) +
+labs(
+  title = "Percent Change in Violent Crime by County, 2020",
+    x = "Year",
+    y = "% Change in Violent Crime per 100,000 People")+
+  theme(
+    axis.text.x = element_text(angle = 90,  hjust=1)
+  )
+
+# Graph total violent crime per capita in Worcester County over time
+
+violent_and_property_crime_worcester <- violent_and_property_crime_md |>
+  filter(jurisdiction == "Worcester County")
+
+violent_and_property_crime_worcester |>
+  ggplot() +
+  geom_bar(aes(x=year, weight=violent_crime_rate_per_100_000_people)) +
+labs(
+  title = "Violent Crime Rate in Worcester County, 1975-2020",
+    x = "Year",
+    y = "Violent Crimes per 100,000 people")
+
+# Compare graphs of demographics of black residents and the previous graph of percent change violent crime rates in 2020
+murder_violent_crime_demographics_md |>
+  ggplot() +
+  geom_bar(aes(x=reorder(jurisdiction,pct_black), weight=pct_black)) +
+  geom_bar(aes(x=jurisdiction, weight=pct_black)) +
+labs(
+  title = "Percent of Population that's Black, 2020",
+    x = "County",
+    y = "% Black")+
+  theme(
+    axis.text.x = element_text(angle = 90,  hjust=1)
+  )
+
 
 # Display results of code below this codeblock
 
@@ -233,9 +320,9 @@ murder_violent_crime_demographics_md <- murder_total_violent_crime_md |>
 
 ### Story Idea 3
 
--   **Sentence text**: How does the unemployment rate map onto violent crime in Baltimore? Could that explain crime in Baltimore better than the Freddie Gray Effect or Covid-19?
+-   **How does the unemployment rate map onto violent crime in Baltimore? Could that explain crime in Baltimore better than the Freddie Gray Effect or Covid-19?**
 
--   **Analysis summary**: [Write up two to three sentences describing the results of your analysis. Were you able to confirm the finding? If not, why not?]
+-   **Analysis summary**: When looking at the violent crime trends and murder rate in Baltimore City I don't see a clear correlation between that and unemployment, though I've heard before that unemployment often correlates with crime. Could be a jumping off point for a story if Baltimore is an outlier, or a debunking of an incorrect theory in the zeitgeist.
 
 ```{r}
 # Put code here
@@ -243,7 +330,7 @@ murder_violent_crime_demographics_md <- murder_total_violent_crime_md |>
 
 #There wasn't data by county before 1990
 
-# I made a Google spreadsheet by copying and pasting the relevant data and will read that in as a csv now
+# I made a Google spreadsheet by copying and pasting the relevant data and will read that in as a csv here
 
 unemployment_rate_md_1990_2020 <- read_csv("data/unemployment_rate_md_1990_2020.csv") |>
   rename(county = "...1")
@@ -254,29 +341,64 @@ unemployment_bc <-unemployment_rate_md_1990_2020 |>
 # reorganize the dataset with help from chat GPT
 
 unemployment_bc_long <- unemployment_bc %>%
-  gather(key = "year", value = "crime_rate", -county) %>%
+  gather(key = "year", value = "unemployment_rate", -county) %>%
   mutate(year = as.integer(year))
 
 # Line graph of unemployment rates in Baltimore City over time
 
-ggplot(unemployment_bc_long, aes(x = year, y = crime_rate, color = county)) +
+ggplot(unemployment_bc_long, aes(x = year, y = unemployment_rate)) +
   geom_line() +
   labs(title = "Baltimore City Unemployment Rate, 1990-2020",
        x = "Year",
-       y = "Crime Rate",
-       color = "County")
+       y = "Unemployment Rate")
 
-# Make a dataframe
+# Make the Baltimore City murder rate graph again but only from 1990 to 2020
+violent_and_property_crime_bc |>
+  filter(year >= 1990 & year <= 2020)|>
+  ggplot() +
+  geom_bar(aes(x=year, weight=murder_per_100_000_people)) +
+labs(
+  title = "Murder rate in Baltimore City, 1975-2020",
+    x = "Year",
+    y = "Murders per 100,000 people")
 
+# Make the Baltimore City violent crime graph
 
-#ggplot() +
-#  geom_line(data = unemployment_bc_long, aes(x = year, y = crime_rate, color = county)) +
-#  geom_bar(data = bar_data_long, aes(x = Year, y = BarValue, fill = county),
- #          stat = "identity", position = "dodge") +
- # labs(title = "Overlay of Line Graph and Bar Chart",
- #      x = "Year",
- #      y = "Value")
+violent_and_property_crime_bc |>
+  filter(year >= 1990 & year <= 2020)|>
+  ggplot() +
+  geom_bar(aes(x=year, weight=violent_crime_rate_per_100_000_people)) +
+labs(
+  title = "Violent crime rate in Baltimore City, 1975-2020",
+    x = "Year",
+    y = "Violent crimes per 100,000 people")
+
 
 # Display results of code below this codeblock
 
 ```
+
+Appendix - Main Chat GPT Questions:
+
+in r studio with tidyverse if a i have a column that is a list of different years, how do i only show rows from one year?
+
+how do i search for NA values in a dataset in r using tidyverse?
+
+how do i check if two columns have the same data in r using tidyverse?
+
+How do I do this if the two columns I'm comparing are called grand_total and grand_total_checked
+
+If I am using tidyverse and I have a column of counties and I want to remove just the rows that pertain to one county, how do i do that in a simple way in r studio?
+
+how do i add the word County to names in a column in r using tidyverse
+
+how do i do that but put the word County at the end of the name in the cells?
+
+great now how do i do that for most of the names in the column except I don't want one cell that says Baltimore City to have County added to it
+
+How do i do a line graph in r with tidyverse and ggplot of a dataset that has one row that represents crime rate data for Baltimore City and then columns that represent years. I want years to be the x axis and the crime rates to be the y axis
+
+The column names are called "county" and "1990", "1991" etc
+
+if i have a column of years from 1975 to 2020 but i only want the data from 1990 to 2020 how do i get rid of those earlier rows using tidyverse?
+
