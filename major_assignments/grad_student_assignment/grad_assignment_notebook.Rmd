@@ -388,7 +388,7 @@ how do i check if two columns have the same data in r using tidyverse?
 
 How do I do this if the two columns I'm comparing are called grand_total and grand_total_checked
 
-If I am using tidyverse and I have a column of counties and I want to remove just the rows that pertain to one county, how do i do that in a simple way in r studio? 
+If I am using tidyverse and I have a column of counties and I want to remove just the rows that pertain to one county, how do i do that in a simple way in r studio?
 
 how do i add the word County to names in a column in r using tidyverse
 
@@ -401,4 +401,3 @@ How do i do a line graph in r with tidyverse and ggplot of a dataset that has on
 The column names are called "county" and "1990", "1991" etc
 
 if i have a column of years from 1975 to 2020 but i only want the data from 1990 to 2020 how do i get rid of those earlier rows using tidyverse?
-
